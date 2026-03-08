@@ -31,19 +31,21 @@ var commands = [
         async execute(message, args) {
             const embeds = []
             modules.forEach(module => {
-                let fields = []
-                var embed = new EmbedBuilder().setTitle(client.user.username + " | " + " Module: " + module.helpData.title).setDescription(module.helpData.description)
-                if (module.commands) {
-                    module.commands.forEach(commandData => {
-                        if (!commandData.hidden) {
-                            fields.push({ name: "Command: " + commandData.id, value: commandData.description })
-                        }
-                    });
-                } else {
-                    fields.push({ name: "No Commands found!", value: "No commands to display at this time!" })
+                if (!module.hidden) {
+                    let fields = []
+                    var embed = new EmbedBuilder().setTitle(client.user.username + " | " + " Module: " + module.helpData.title).setDescription(module.helpData.description)
+                    if (module.commands) {
+                        module.commands.forEach(commandData => {
+                            if (!commandData.hidden) {
+                                fields.push({ name: "Command: " + commandData.id, value: commandData.description })
+                            }
+                        });
+                    } else {
+                        fields.push({ name: "No Commands found!", value: "No commands to display at this time!" })
+                    }
+                    embed.addFields(fields)
+                    embeds.push(embed)
                 }
-                embed.addFields(fields)
-                embeds.push(embed)
             });
             message.reply({
                 content: "Help commands for bot " + client.user.username + " in server " + message.guild.name,

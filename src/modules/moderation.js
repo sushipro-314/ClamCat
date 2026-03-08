@@ -1,4 +1,3 @@
-exports.hidden = true
 exports.setup = async function (client, config) {
 
 }
