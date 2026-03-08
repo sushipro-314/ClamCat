@@ -1,8 +1,13 @@
 const { Player, useMainPlayer, useQueue } = require('discord-player');
-const { DefaultExtractors } = require('@discord-player/extractor');
+const { EmbedBuilder } = require("discord.js")
+const { SoundcloudExtractor } = require("discord-player-soundcloud");
+const { SpotifyExtractor } = require("discord-player-spotify");
+const { AppleMusicExtractor } = require("discord-player-applemusic");
 exports.setup = async function (client, config) {
     const player = new Player(client);
-    await player.extractors.loadMulti(DefaultExtractors);
+    await player.extractors.register(SoundcloudExtractor);
+    await player.extractors.register(SpotifyExtractor);
+    await player.extractors.register(AppleMusicExtractor);
     // this event is emitted whenever discord-player starts to play a track
     player.events.on('playerStart', (queue, track) => {
         // we will later define queue.metadata object while creating the queue
@@ -29,7 +34,22 @@ exports.commands = [
                     metadata: message, // we can access this metadata object using queue.metadata later on
                 },
             });
+            var embedPlay = new EmbedBuilder().setTitle("Now Playing: " + track.title).setImage(track.thumbnail).setDescription(track.description).setAuthor({ name: 'Some name', iconURL: track.thumbnail, url: track.url })
+            message.reply({content: "**Now Playing**: " + track.title, embeds: [embedPlay]})
         },
+    },
+    {
+        "id": "playing",
+        async execute(message, args) {
+            const queue = useQueue(message.guild);
+            if (queue.isPlaying()) {
+                const track = queue.currentTrack
+                var embedPlay = new EmbedBuilder().setTitle("Now Playing: " + track.title).setImage(track.thumbnail).setDescription(track.description).setAuthor({ name: 'Some name', iconURL: track.thumbnail, url: track.url })
+                message.reply({content: "**Now Playing**: " + track.title, embeds: [embedPlay]})
+            } else {
+                queue.metadata.reply("No song is currently playing!")
+            }
+        }
     },
     {
         "id": "skip",
@@ -40,14 +60,16 @@ exports.commands = [
             if (args.length < 0) return message.reply("You must specify a song to play!")
             const query = args[0] // we need input/query to play
             queue.node.skip()
+            message.reply("Skipped from queue successfully!")
         },
     },
     {
         "id": "stop",
         async execute(message, args) {
-            const queue = useQueue();
+            const queue = useQueue(message.guild);
             queue.node.stop();
             queue.clear()
+            message.reply("Queue has been cleared and stopped successfully!")
         },
     },
 ]
