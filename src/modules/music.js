@@ -32,7 +32,7 @@ exports.commands = [
             const channel = message.member.voice.channel;
             if (!channel) return message.reply('You are not connected to a voice channel!'); // make sure we have a voice channel
             if (args.length < 0) return message.reply("You must specify a song to play!")
-            const query = args[0] // we need input/query to play
+            const query = args.join(" ") // we need input/query to play
             const { track } = await player.play(channel, query, {
                 nodeOptions: {
                     // nodeOptions are the options for guild node (aka your queue in simple word)
