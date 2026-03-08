@@ -34,7 +34,7 @@ exports.commands = [
                     metadata: message, // we can access this metadata object using queue.metadata later on
                 },
             });
-            var embedPlay = new EmbedBuilder().setTitle("Now Playing: " + track.title).setImage(track.thumbnail).setDescription(track.description).setAuthor({ name: track.name, iconURL: track.thumbnail, url: track.url })
+            var embedPlay = new EmbedBuilder().setTitle("Now Playing: " + track.title).setImage(track.thumbnail).setDescription(track.description).setAuthor({ name: track.cleanTitle, iconURL: track.thumbnail, url: track.url })
             message.reply({content: "**Now Playing**: " + track.title, embeds: [embedPlay]})
         },
     },
@@ -44,7 +44,7 @@ exports.commands = [
             const queue = useQueue(message.guild);
             if (queue.isPlaying()) {
                 const track = queue.currentTrack
-                var embedPlay = new EmbedBuilder().setTitle("Now Playing: " + track.title).setImage(track.thumbnail).setDescription(track.description).setAuthor({ name: track.name, iconURL: track.thumbnail, url: track.url })
+                var embedPlay = new EmbedBuilder().setTitle("Now Playing: " + track.title).setImage(track.thumbnail).setDescription(track.description).setAuthor({ name: track.cleanTitle, iconURL: track.thumbnail, url: track.url })
                 message.reply({content: "**Now Playing**: " + track.title, embeds: [embedPlay]})
             } else {
                 queue.metadata.reply("No song is currently playing!")
