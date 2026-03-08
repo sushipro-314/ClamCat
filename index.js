@@ -28,7 +28,28 @@ var commands = []
 // Here is a list of modules that get scanned 
 var modules = []
 
+var scanned = false
+
 client.on("clientReady", () => {
+    if (!scanned) {
+        fs.readdir("./src/modules", async (err, files) => {
+            if (!err) {
+                // Scans through every file pushes it to the commands array
+                for (const file of files) {
+                    let module = require(__dirname + "/src/modules/" + file)
+                    module.setup(client, config)
+                    if (module.commands) {
+                        module.commands.forEach((command) => {
+                            commands.push(command)
+                        })
+                    }
+                }
+                scanned = true
+            } else {
+                throw err
+            }
+        })
+    }
     // This event will run if the bot starts, and logs in, successfully.
     console.log(`Bot has started, with ${client.users.cache.size} users, in ${client.channels.cache.size} channels of ${client.guilds.cache.size} guilds.`);
     // Example of changing the bot's playing game to something useful. `client.user` is what the
@@ -77,20 +98,5 @@ client.on("messageCreate", async message => {
         }
     });
 });
-
-fs.readdir("./src/modules", async (err, files) => {
-    if (!err) {
-        // Scans through every file pushes it to the commands array
-        for (const file of files) {
-            let module = require(__dirname + "/src/modules/" + file)
-            module.setup(client, config)
-            if (module.commands) {
-                module.commands.forEach((command) => {
-                    commands.push(command)
-                })
-            }
-        }
-    }
-})
 
 client.login(config.token);
