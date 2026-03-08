@@ -18,10 +18,15 @@ exports.setup = async function (client, config) {
         queue.metadata.reply(`An unknown error occurred! Try again later!\nError: ${error}`);
     });
 }
+exports.helpData = {
+    "title": "Music",
+    "description": "Commands & Utlilies for playing music in a voice channel"
+}
 
 exports.commands = [
     {
         "id": "play",
+        "description": "Plays a song is a voice channel",
         async execute(message, args) {
             const player = useMainPlayer(); // get player instance
             const channel = message.member.voice.channel;

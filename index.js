@@ -20,16 +20,70 @@ const client = new Discord.Client({
 
 // Here we load the config.json file that contains our token and our prefix values. 
 const config = require("./config.json");
+const { EmbedBuilder } = require("discord.js");
 // config.token contains the bot's token
 // config.prefix contains the message prefix.
 
 // Here is the commands list. This will be changed as we scan the modules directory for new modules that then add commands, although these ones are the default commands for now.
-var commands = []
+var commands = [
+    {
+        "id": "help",
+        async execute(message, args) {
+            const embeds = []
+            modules.forEach(module => {
+                let fields = []
+                var embed = new EmbedBuilder().setTitle(client.user.username + " | " + " Module: " + module.helpData.title).setDescription(module.helpData.description)
+                if (module.commands) {
+                    module.commands.forEach(commandData => {
+                        if (!commandData.hidden) {
+                            fields.push({ name: "Command: " + commandData.id, value: commandData.description })
+                        }
+                    });
+                } else {
+                    fields.push({ name: "No Commands found!", value: "No commands to display at this time!" })
+                }
+                embed.addFields(fields)
+                embeds.push(embed)
+            });
+            message.reply({
+                content: "Help commands for bot " + client.user.username + " in server " + message.guild.name,
+                embeds: embeds
+            })
+        }
+    }
+]
+// Default metadata for the help command!
+var defaultHelpData = {
+    "title": "Unknown",
+    "id": "unknown",
+    "description": "No description provided!"
+}
 
 // Here is a list of modules that get scanned 
 var modules = []
 
 var scanned = false
+
+async function vaildateCommand(commandTable) {
+    if (!commandTable.description) {
+        commandTable.description = defaultHelpData.description
+    }
+    if (!commandTable.aliases) {
+        commandTable.aliases = [commandTable.id]
+    }
+}
+
+async function registerModule(pathName) {
+    let module = require(__dirname + pathName)
+    module.setup(client, config)
+    if (module.commands) {
+        module.commands.forEach((command) => {
+            vaildateCommand(command)
+            commands.push(command)
+        })
+    }
+    modules.push(module)
+}
 
 client.on("clientReady", () => {
     if (!scanned) {
@@ -37,13 +91,7 @@ client.on("clientReady", () => {
             if (!err) {
                 // Scans through every file pushes it to the commands array
                 for (const file of files) {
-                    let module = require(__dirname + "/src/modules/" + file)
-                    module.setup(client, config)
-                    if (module.commands) {
-                        module.commands.forEach((command) => {
-                            commands.push(command)
-                        })
-                    }
+                    registerModule("/src/modules/" + file)
                 }
                 scanned = true
             } else {
@@ -71,6 +119,13 @@ client.on("guildDelete", guild => {
     client.user.setActivity(`Serving ${client.guilds.cache.size} servers`);
 });
 
+client.on("error", err => {
+    console.error("An unknown error occurred in the bot: " + err.message)
+    if (config.debug) {
+        console.error(err.stack)
+    }
+});
+
 if (config.debug) {
     client.on("debug", console.log)
 }
@@ -87,17 +142,16 @@ client.on("messageCreate", async message => {
     if (message.content.indexOf(config.prefix) !== 0) return;
 
     // Here we separate our "command" name, and our "arguments" for the command. 
-    // e.g. if we have the message "+say Is this the real life?" , we'll get the following:
+    // e.g. if we have the message "cc!say Is this the real life?" , we'll get the following:
     // command = say
     // args = ["Is", "this", "the", "real", "life?"]
     const args = message.content.slice(config.prefix.length).trim().split(/ +/g);
     const command = args.shift().toLowerCase();
-    commands.forEach(async commandData => {
-        if ((commandData.id == command) || (commandData.aliases && (command in commandData.aliases))) {
-            console.log("User ran command: " + command)
-            await commandData.execute(message, args)
-        }
-    });
+    const commandsFound = commands.filter(commandFound => ((commandFound.id == command) || (commandFound.aliases && (command in commandFound.aliases))))
+    if (commandsFound[0]) {
+        console.log("User ran command: " + command)
+        await commandsFound[0].execute(message, args)
+    }
 });
 
 client.login(config.token);
