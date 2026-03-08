@@ -15,6 +15,7 @@ const client = new Discord.Client({
         Discord.GatewayIntentBits.GuildVoiceStates,
         Discord.GatewayIntentBits.GuildMembers,
     ],
+    partials: ['MESSAGE', 'CHANNEL', 'REACTION']
 });
 
 // Here we load the config.json file that contains our token and our prefix values. 
