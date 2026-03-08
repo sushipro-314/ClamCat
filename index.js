@@ -49,7 +49,9 @@ client.on("guildDelete", guild => {
     client.user.setActivity(`Serving ${client.guilds.cache.size} servers`);
 });
 
-client.on("debug", console.log)
+if (config.debug) {
+    client.on("debug", console.log)
+}
 
 client.on("messageCreate", async message => {
     // This event will run on every single message received, from any channel or DM.
