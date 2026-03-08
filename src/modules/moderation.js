@@ -1,3 +1,5 @@
+const { PermissionsBitField } = require("discord.js")
+
 exports.setup = async function (client, config) {
 
 }
@@ -10,6 +12,9 @@ exports.commands = [
     {
         "id": "ban",
         "description": "Ban a user by ID (usage: 'prefix!ban <userID> <deleteSeconds> <reason>')",
+        "permissions": [
+            PermissionsBitField.Flags.BanMembers
+        ],
         async execute(message, args) {
             let user = message.mentions.members.first() || message.guild.members.cache.get(args[0])
             try {
@@ -26,6 +31,9 @@ exports.commands = [
     {
         "id": "kick",
         "description": "Kick a user by ID (usage: 'prefix!kick <userID> <reason>')",
+        "permissions": [
+            PermissionsBitField.Flags.KickMembers
+        ],
         async execute(message, args) {
             const user = message.mentions.members.first() || message.guild.members.cache.get(args[0])
             try {
@@ -39,6 +47,9 @@ exports.commands = [
     {
         "id": "mute",
         "description": "Mutes/timeouts a user by ID (usage: 'prefix!timeout <userID> <duration> <reason>')",
+        "permissions": [
+            PermissionsBitField.Flags.MuteMembers
+        ],
         async execute(message, args) {
             const user = message.mentions.members.first() || message.guild.members.cache.get(args[0])
             try {

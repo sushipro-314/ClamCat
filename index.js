@@ -21,6 +21,8 @@ const client = new Discord.Client({
 // Here we load the config.json file that contains our token and our prefix values. 
 const config = require("./config.json");
 const { EmbedBuilder } = require("discord.js");
+const { GuildMember } = require("discord.js");
+const { PermissionsBitField } = require("discord.js");
 // config.token contains the bot's token
 // config.prefix contains the message prefix.
 
@@ -72,6 +74,9 @@ async function vaildateCommand(commandTable) {
     }
     if (!commandTable.aliases) {
         commandTable.aliases = [commandTable.id]
+    }
+    if (!commandTable.permissions) {
+        commandTable.permissions = [PermissionsBitField.Default]
     }
 }
 
@@ -150,9 +155,11 @@ client.on("messageCreate", async message => {
     const args = message.content.slice(config.prefix.length).trim().split(/ +/g);
     const command = args.shift().toLowerCase();
     const commandsFound = commands.filter(commandFound => ((commandFound.id == command) || (commandFound.aliases && (command in commandFound.aliases))))
-    if (commandsFound[0]) {
+    if (commandsFound[0] && message.member.permissions.has(commandsFound[0].permissions)) {
         console.log("User ran command: " + command)
         await commandsFound[0].execute(message, args)
+    } else {
+        message.reply("```You either do not have permission to perform this action or the command you used does not exist.```")
     }
 });
 

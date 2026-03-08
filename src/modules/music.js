@@ -26,7 +26,7 @@ exports.helpData = {
 exports.commands = [
     {
         "id": "play",
-        "description": "Plays a song is a voice channel",
+        "description": "Plays a song in a voice channel",
         async execute(message, args) {
             const player = useMainPlayer(); // get player instance
             const channel = message.member.voice.channel;
@@ -45,6 +45,7 @@ exports.commands = [
     },
     {
         "id": "playing",
+        "description": "Displays what is playing in a voice channel",
         async execute(message, args) {
             const queue = useQueue(message.guild);
             if (queue.isPlaying()) {
@@ -58,6 +59,7 @@ exports.commands = [
     },
     {
         "id": "skip",
+        "description": "Skips what is playing in a voice channel",
         async execute(message, args) {
             const channel = message.member.voice.channel;
             const queue = useQueue(message.guild);
@@ -70,6 +72,7 @@ exports.commands = [
     },
     {
         "id": "stop",
+        "description": "Stops what is playing in a voice channel and clears the queue for the server",
         async execute(message, args) {
             const queue = useQueue(message.guild);
             queue.node.stop();
