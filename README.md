@@ -1,5 +1,5 @@
 # ClamCat
-This is an open-source discord bot I'm working on that currently only features music but has more to release soon!
+This is an open-source discord bot I'm working on that currently only features music & moderation but has more to release soon!
 ## Prerequisites
 - FFMPEG
 - Node.JS installed
