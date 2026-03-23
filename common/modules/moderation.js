@@ -1,0 +1,64 @@
+const { PermissionsBitField } = require("discord.js")
+
+module.exports = {
+    "setup": async function () {
+
+    },
+    "helpData": {
+        "title": "Moderation",
+        "description": "Moderate your discord server!"
+    },
+    "commands": [
+        {
+            "id": "ban",
+            "description": "Ban a user by ID (usage: 'prefix!ban <userID> <deleteSeconds> <reason>')",
+            "permissions": [
+                PermissionsBitField.Flags.BanMembers
+            ],
+            async execute(message, args) {
+                let user = message.mentions.members.first() || message.guild.members.cache.get(args[0])
+                try {
+                    user.ban({
+                        deleteMessageSeconds: args[1],
+                        reason: args.slice(2).join(" "),
+                    })
+                    message.reply("***User " + user.user.username + " has been banned***")
+                } catch (err) {
+                    throw err
+                }
+            }
+        },
+        {
+            "id": "kick",
+            "description": "Kick a user by ID (usage: 'prefix!kick <userID> <reason>')",
+            "permissions": [
+                PermissionsBitField.Flags.KickMembers
+            ],
+            async execute(message, args) {
+                const user = message.mentions.members.first() || message.guild.members.cache.get(args[0])
+                try {
+                    user.kick(args.slice(1).join(" "))
+                    message.reply("***User " + user.user.username + " has been kicked***")
+                } catch (err) {
+                    throw err;
+                }
+            }
+        },
+        {
+            "id": "mute",
+            "description": "Mutes/timeouts a user by ID (usage: 'prefix!timeout <userID> <duration> <reason>')",
+            "permissions": [
+                PermissionsBitField.Flags.MuteMembers
+            ],
+            async execute(message, args) {
+                const user = message.mentions.members.first() || message.guild.members.cache.get(args[0])
+                try {
+                    user.timeout(args[1] * 60 * 1000, args.slice(2).join(" "))
+                    message.reply("***User " + user.user.username + " has been muted***")
+                } catch (err) {
+                    throw err;
+                }
+            }
+        }
+    ]
+}

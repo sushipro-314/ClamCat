@@ -19,9 +19,8 @@ const client = new Discord.Client({
 });
 
 // Here we load the config.json file that contains our token and our prefix values. 
-const config = require("./config.json");
-const { EmbedBuilder } = require("discord.js");
-const { GuildMember } = require("discord.js");
+const config = require("./common/config.json");
+const { GuildMember, EmbedBuilder } = require("discord.js");
 const { PermissionsBitField } = require("discord.js");
 // config.token contains the bot's token
 // config.prefix contains the message prefix.
@@ -31,7 +30,7 @@ var commands = [
     {
         "id": "help",
         async execute(message, args) {
-            const embeds = []
+            var embeds = []
             modules.forEach(module => {
                 if (!module.hidden) {
                     let fields = []
@@ -66,9 +65,11 @@ var defaultHelpData = {
 // Here is a list of modules that get scanned 
 var modules = []
 
+// A variable for checking if the commands have already been scanned.
 var scanned = false
 
 async function vaildateCommand(commandTable) {
+    // Checks each command in a table for missing objects required to load the module
     if (!commandTable.description) {
         commandTable.description = defaultHelpData.description
     }
@@ -79,29 +80,45 @@ async function vaildateCommand(commandTable) {
         commandTable.permissions = [PermissionsBitField.Default]
     }
 }
-
+// Setup function for the module
 async function registerModule(pathName) {
-    let module = require(__dirname + pathName)
-    module.setup(client, config)
+    // Set extra paremeters in configuration (but not affect the file)
+    config.modules = modules
+    config.commands = commands
+    // We require the module
+    let module = require(pathName)
+    // Then we call the setup function
+    module["setup"](client, config)
+    // Check if commands exist
     if (module.commands) {
+        // Loop through each command in the commands array
         module.commands.forEach((command) => {
+            // Validate the command by adding any missing settings to it
             vaildateCommand(command)
+            // Add it to the commands array
             commands.push(command)
         })
     }
     modules.push(module)
 }
-
+// The path to which modules are scanned and loaded
+var modulesFolder = "./common/modules"
+// Client ready event for when the bot starts
 client.on("clientReady", () => {
+    // Checks the scanned variable to see if it's true
     if (!scanned) {
-        fs.readdir("./src/modules", async (err, files) => {
+        // Reads the modules folder
+        fs.readdir(modulesFolder, async (err, files) => {
             if (!err) {
                 // Scans through every file pushes it to the commands array
                 for (const file of files) {
-                    registerModule("/src/modules/" + file)
+                    // Register the module by appending the file to the module folder path
+                    registerModule(modulesFolder + "/" + file)
                 }
+                // Set scanned to true
                 scanned = true
             } else {
+                // Throw an error if modules folder cannot be loaded properly
                 throw err
             }
         })
@@ -111,7 +128,6 @@ client.on("clientReady", () => {
     // Example of changing the bot's playing game to something useful. `client.user` is what the
     // docs refer to as the "ClientUser".
     client.user.setActivity(`Serving ${client.guilds.cache.size} servers`);
-    // Reads the modules folder
 });
 
 client.on("guildCreate", guild => {
