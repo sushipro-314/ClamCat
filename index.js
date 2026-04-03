@@ -170,7 +170,7 @@ client.on("messageCreate", async message => {
     // args = ["Is", "this", "the", "real", "life?"]
     const args = message.content.slice(config.prefix.length).trim().split(/ +/g);
     const command = args.shift().toLowerCase();
-    const commandsFound = commands.filter(commandFound => ((commandFound.id == command) || (commandFound.aliases && (command in commandFound.aliases))))
+    const commandsFound = commands.filter(commandFound => ((commandFound.id == command) || (commandFound.aliases && (commandFound.aliases.includes(command)))))
     if (commandsFound[0] && message.member.permissions.has(commandsFound[0].permissions)) {
         console.log("User ran command: " + command)
         await commandsFound[0].execute(message, args)

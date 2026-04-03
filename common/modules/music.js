@@ -17,7 +17,7 @@ module.exports = {
         });
         player.events.on('playerError', (queue, error) => {
             // we will later define queue.metadata object while creating the queue
-            queue.metadata.reply(`An unknown error occurred! Try again later!\nError: ${error}`);
+            queue.metadata.reply(`An unknown error occurred! Try again later!\nError message: ${error.message}`);
         });
     },
     "helpData": {
@@ -30,6 +30,7 @@ module.exports = {
             "description": "Plays a song in a voice channel",
             async execute(message, args) {
                 const player = useMainPlayer(); // get player instance
+                const queue = useQueue(message.guild);
                 const channel = message.member.voice.channel;
                 if (!channel) return message.reply('You are not connected to a voice channel!'); // make sure we have a voice channel
                 if (args.length < 0) return message.reply("You must specify a song to play!")
@@ -40,8 +41,33 @@ module.exports = {
                         metadata: message, // we can access this metadata object using queue.metadata later on
                     },
                 });
-                var embedPlay = new EmbedBuilder().setTitle("Now Playing: " + track.title).setImage(track.thumbnail).setDescription(track.description).setAuthor({ name: track.cleanTitle, iconURL: track.thumbnail, url: track.url })
-                message.reply({ content: "**Now Playing**: " + track.title, embeds: [embedPlay] })
+                if (queue && queue.isPlaying()) {
+                    var embedPlay = new EmbedBuilder().setTitle("Added to queue: " + track.title).setImage(track.thumbnail).setDescription(track.description).setAuthor({ name: track.author, iconURL: track.thumbnail, url: track.url })
+                    message.reply({ content: "**Added to queue**: " + track.title, embeds: [embedPlay] })
+                } else {
+                    var embedPlay = new EmbedBuilder().setTitle("Now Playing: " + track.title).setImage(track.thumbnail).setDescription(track.description).setAuthor({ name: track.author, iconURL: track.thumbnail, url: track.url })
+                    message.reply({ content: "**Now Playing**: " + track.title, embeds: [embedPlay] })
+                }
+            },
+        },
+        {
+            "id": "view",
+            "aliases": ["queue", "q"],
+            "description": "Views the currently playing queue",
+            async execute(message, args) {
+                const queue = useQueue(message.guild);
+                if (queue.isPlaying()) {
+                    const track = queue.currentTrack
+                    var embed = new EmbedBuilder().setTitle("Now Playing: " + track.title).setImage(track.thumbnail).setDescription("Queue information for server " + message.guild.name)
+                    var fields = []
+                    queue.tracks.toArray().forEach(tr => {
+                        fields.push({"name": tr.title, "value": "Track by " + track.author})
+                    });
+                    embed.addFields(fields)
+                    message.reply({ content: "**Now Playing**: " + track.title, embeds: [embed] })
+                } else {
+                    queue.metadata.reply("No song is currently playing!")
+                }
             },
         },
         {

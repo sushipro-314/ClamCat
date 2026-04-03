@@ -3,12 +3,15 @@
     "@discordjs/opus": "^0.10.0",
     "@discordjs/voice": "^0.19.0",
     "@snazzah/davey": "^0.1.10",
+    "discord-cross-hosting": "^2.4.0",
+    "discord-hybrid-sharding": "^3.0.1",
     "discord-player": "^7.2.0",
     "discord-player-applemusic": "^1.0.3",
     "discord-player-soundcloud": "^1.0.7",
     "discord-player-spotify": "^1.1.7",
     "discord.js": "^14.25.1",
     "isomorphic-unfetch": "^4.0.2",
+    "mongodb": "^7.1.0",
     "npm": "^11.11.0"
   }
 }
